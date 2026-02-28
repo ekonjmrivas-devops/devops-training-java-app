@@ -18,6 +18,9 @@ def runInDocker(String image, Closure body) {
 
 pipeline {
   agent any
+  parameters {
+    booleanParam(name: 'RUN_CD', defaultValue: true, description: 'Ejecutar CD')
+  }
 
   stages {
     stage('Info') {
@@ -66,16 +69,24 @@ pipeline {
       }
     }
 
+    stages {
+    // ... stages anteriores igual ...
     stage('CD') {
       when {
-        anyOf {
-          branch 'develop'
-          branch 'master'
+        allOf {
+          anyOf {
+            branch 'develop'
+            branch 'master'
+          }
+          expression { return params.RUN_CD }
         }
       }
       steps {
-        echo "Rama ${env.BRANCH_NAME} → ejecutando CD"
+        script {
+          env.DEPLOY_ENV = env.BRANCH_NAME == 'master' ? 'PRO' : 'DEV'
+          echo "Rama ${env.BRANCH_NAME} → entorno: ${env.DEPLOY_ENV}"
+        }
       }
-    }	
+    }
   }
 }
