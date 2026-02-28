@@ -11,6 +11,13 @@ pipeline {
   agent any
 
   stages {
+    stage('Info') {
+	steps {
+		echo "Job: ${env.JOB_NAME}"
+		echo "Build: ${env.BUILD_NUMBER}"
+		echo "Branch: ${env.BRANCH_NAME}"
+	  }
+	}
     stage('Test') {
       /*
         `agent` dentro de un stage permite que SOLO ese stage se ejecute en un contexto concreto.
