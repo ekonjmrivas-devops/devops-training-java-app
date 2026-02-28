@@ -9,6 +9,10 @@ pipeline {
   parameters {
     booleanParam(name: 'RUN_CD', defaultValue: true, description: 'Ejecutar CD')
   }
+  environment {
+    IMAGE_NAME = "java-hello-world:${env.BUILD_NUMBER}"
+    APP_URL = "http://localhost:8084"
+  }
   stages {
     stage('Info') {
       steps {
@@ -46,7 +50,6 @@ pipeline {
     stage('CI - Build image') {
       steps {
         script {
-          env.IMAGE_NAME = "java-hello-world:${env.BUILD_NUMBER}"
           docker.build(env.IMAGE_NAME, "--build-arg VERSION=0.0.1-SNAPSHOT -f devops/Dockerfile .")
         }
       }
@@ -64,7 +67,9 @@ pipeline {
       steps {
         script {
           env.DEPLOY_ENV = env.BRANCH_NAME == 'master' ? 'PRO' : 'DEV'
-          echo "Rama ${env.BRANCH_NAME} → entorno: ${env.DEPLOY_ENV}"
+          echo "Entorno: ${env.DEPLOY_ENV}"
+          echo "Image: ${env.IMAGE_NAME}"
+          echo "App URL: ${env.APP_URL}"
         }
       }
     }
