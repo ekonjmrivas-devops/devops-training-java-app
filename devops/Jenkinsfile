@@ -65,5 +65,17 @@ pipeline {
         }
       }
     }
+
+    stage('CD') {
+      when {
+        anyOf {
+          branch 'develop'
+          branch 'master'
+        }
+      }
+      steps {
+        echo "Rama ${env.BRANCH_NAME} → ejecutando CD"
+      }
+    }	
   }
 }
