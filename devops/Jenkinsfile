@@ -1,15 +1,3 @@
-/*
-  Tema 4: Pipelines CI/CD
-	Práctica 2
-	. Jenkinsfile dummy (PUNTO DE PARTIDA) #Done
-	. Añadir stage 'Info' #Done
-	. Añadir stage 'CI - Build tools image' & 'CI - Lint' #Doing
-
-  Este Jenkinsfile es intencionalmente simple. En la Practica 2 iras anadiendo
-  piezas (stages, agents, funciones Groovy, Docker build, docker compose, etc.)
-  hasta construir un pipeline CI/CD completo.
-*/
-
 def runInDocker(String image, Closure body) {
   docker.image(image).inside {
     body()
@@ -21,7 +9,6 @@ pipeline {
   parameters {
     booleanParam(name: 'RUN_CD', defaultValue: true, description: 'Ejecutar CD')
   }
-
   stages {
     stage('Info') {
       steps {
@@ -30,7 +17,6 @@ pipeline {
         echo "Branch: ${env.BRANCH_NAME}"
       }
     }
-
     stage('CI - Build tools image') {
       steps {
         script {
@@ -39,7 +25,6 @@ pipeline {
         }
       }
     }
-
     stage('CI - Lint') {
       steps {
         script {
@@ -49,7 +34,6 @@ pipeline {
         }
       }
     }
-
     stage('CI - Test') {
       steps {
         script {
@@ -59,7 +43,6 @@ pipeline {
         }
       }
     }
-
     stage('CI - Build image') {
       steps {
         script {
@@ -68,9 +51,6 @@ pipeline {
         }
       }
     }
-
-    stages {
-    // ... stages anteriores igual ...
     stage('CD') {
       when {
         allOf {
