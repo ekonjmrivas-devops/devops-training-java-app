@@ -10,6 +10,12 @@
   hasta construir un pipeline CI/CD completo.
 */
 
+def runInDocker(String image, Closure body) {
+  docker.image(image).inside {
+    body()
+  }
+}
+
 pipeline {
   agent any
 
@@ -34,7 +40,7 @@ pipeline {
     stage('CI - Lint') {
       steps {
         script {
-          docker.image(env.CI_IMAGE_NAME).inside {
+          runInDocker(env.CI_IMAGE_NAME) {
             sh 'make lint'
           }
         }
@@ -44,7 +50,7 @@ pipeline {
     stage('CI - Test') {
       steps {
         script {
-          docker.image(env.CI_IMAGE_NAME).inside {
+          runInDocker(env.CI_IMAGE_NAME) {
             sh 'make test'
           }
         }
