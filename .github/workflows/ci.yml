@@ -1,6 +1,6 @@
 # Práctica 3 - GitHub Actions (dummy)
 
-name: CI (dummy)
+name: CI/CD
 on:
   push:
     branches: ['**']
@@ -13,12 +13,16 @@ on:
         type: boolean
         default: false
 jobs:
-  dummy:
+  ci:
+    name: CI
     runs-on: ubuntu-latest
     steps:
-      - name: Mostrar contexto
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Info
         run: |
-          echo "Repo: $GITHUB_REPOSITORY"
-          echo "Ref:  $GITHUB_REF"
-          echo "Branch: $GITHUB_REF_NAME"
+          echo "Branch:  ${{ github.ref_name }}"
+          echo "SHA:     ${{ github.sha }}"
+          echo "Runner OS:   ${{ runner.os }}"
+          echo "Runner Name: ${{ runner.name }}"
 
