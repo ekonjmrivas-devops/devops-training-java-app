@@ -25,7 +25,8 @@ env:
 jobs:
   ci:
     name: CI
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, docker]
     environment: ${{ github.ref_name == 'master' && 'PRO' || 'DEV' }}
     container:
       image: maven:3.8.6-openjdk-11-slim
@@ -58,7 +59,8 @@ jobs:
 
   build:
     name: Build image
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, docker]
     needs: [ci]
     steps:
       - name: Checkout
@@ -68,7 +70,8 @@ jobs:
 
   cd:
     name: CD
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, docker]
     needs: [build]
     if: >
       (github.ref_name == 'develop' || github.ref_name == 'master')
