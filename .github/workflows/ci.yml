@@ -84,7 +84,18 @@ jobs:
           echo "Deploying to $DEPLOY_ENV"
           echo "Branch: ${{ github.ref_name }}"
           echo "RUN_CD: ${{ inputs.RUN_CD }}"
-
+      - name: Build image
+        run: docker build -t "$IMAGE_NAME" -f devops/Dockerfile .
+      - name: Deploy
+        run: |
+          docker compose up -d app
+          sleep 5
+          docker compose logs app
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down --volumes || true
+          docker rmi "$IMAGE_NAME" || true
 
 
 
