@@ -12,6 +12,11 @@ on:
         description: 'Ejecutar CD (solo develop/master)'
         type: boolean
         default: false
+      DEPLOY_ENV:
+        description: 'Entorno de despliegue'
+        type: choice
+        options: [DEV, PRO]
+        default: DEV
 
 env:
   IMAGE_NAME: "scalian_training-java-hello-world:0.0.2"
@@ -37,3 +42,7 @@ jobs:
           echo "IMAGE_NAME:  ${{ env.IMAGE_NAME }}"
           echo "APP_URL:     ${{ env.APP_URL }}"
           echo "APP_URL (shell): $APP_URL"
+      - name: Inputs
+        run: |
+          echo "RUN_CD:     ${{ inputs.RUN_CD }}"
+          echo "DEPLOY_ENV: ${{ inputs.DEPLOY_ENV }}"
