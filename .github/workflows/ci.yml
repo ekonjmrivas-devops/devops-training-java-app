@@ -47,10 +47,16 @@ jobs:
         run: |
           echo "RUN_CD:     ${{ inputs.RUN_CD }}"
           echo "DEPLOY_ENV: ${{ inputs.DEPLOY_ENV }}"
+#      - name: Lint
+#        run: |
+#         docker run --rm -v "$PWD:/app" -w /app maven:3.8.6-openjdk-11-slim \
+#         sh -c "apt-get update -q && apt-get install -y -q --no-install-recommends make && make lint"
       - name: Lint
         run: |
+          echo "PWD: $PWD"
+          ls -la
           docker run --rm -v "$PWD:/app" -w /app maven:3.8.6-openjdk-11-slim \
-            sh -c "apt-get update -q && apt-get install -y -q --no-install-recommends make && make lint"
+            sh -c "apt-get update -q && apt-get install -y -q --no-install-recommends make && ls -la && make lint"
       - name: Test
         run: |
           docker run --rm -v "$PWD:/app" -w /app maven:3.8.6-openjdk-11-slim \
