@@ -22,11 +22,12 @@ env:
   IMAGE_NAME: "scalian_training-java-hello-world:0.0.2"
   APP_URL: "http://localhost:8084/hello"
 
-jobs:
-  ci:
+ci:
     name: CI
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'master' && 'PRO' || 'DEV' }}
+    container:
+      image: maven:3.8.6-openjdk-11-slim
     env:
       APP_URL: "http://localhost:9999/hello"
     steps:
@@ -47,3 +48,9 @@ jobs:
         run: |
           echo "RUN_CD:     ${{ inputs.RUN_CD }}"
           echo "DEPLOY_ENV: ${{ inputs.DEPLOY_ENV }}"
+      - name: Install make
+        run: apt-get update && apt-get install -y --no-install-recommends make
+      - name: Lint
+        run: make lint
+      - name: Test
+        run: make test
