@@ -26,6 +26,7 @@ jobs:
   ci:
     name: CI
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'master' && 'PRO' || 'DEV' }}
     env:
       APP_URL: "http://localhost:9999/hello"
     steps:
