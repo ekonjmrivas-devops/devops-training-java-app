@@ -74,4 +74,21 @@ pipeline {
       }
     }
   }
+
+  post {
+    always {
+      script {
+        if (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME == 'master') {
+          echo "Limpiando recursos..."
+          sh "docker compose down --volumes || true"
+        }
+      }
+    }
+    success {
+      echo "Pipeline finalizado correctamente ✅"
+    }
+    failure {
+      echo "Pipeline ha fallado ❌"
+    }
+  }
 }
