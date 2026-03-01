@@ -23,7 +23,7 @@ env:
   APP_URL: "http://localhost:8084/hello"
 
 jobs:
-ci:
+  ci:
     name: CI
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'master' && 'PRO' || 'DEV' }}
