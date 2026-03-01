@@ -19,8 +19,8 @@ Repositorio de la aplicación Java usada en el curso para practicar estrategias 
 
 ## Casos prácticos (5)
 Habrá cinco casos prácticos, cada uno con una única rama de solución `training-x-title`.
-- training-1-jenkins-config (ONGOING)
-- training-2-piplines-ci-cd-jenkins (PENDING)
+- training-1-jenkins-config (DONE)
+- training-2-piplines-ci-cd-jenkins (DONE)
 - training-3-github-actions (PENDING)
 - training-4-gitlab-ci-cd (PENDING)
 - training-5-azure-devops-pipelines (PENDING)
