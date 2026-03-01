@@ -1,7 +1,17 @@
 # Práctica 3 - GitHub Actions (dummy)
+
 name: CI (dummy)
 on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [develop, master]
   workflow_dispatch:
+    inputs:
+      RUN_CD:
+        description: 'Ejecutar CD (solo develop/master)'
+        type: boolean
+        default: false
 jobs:
   dummy:
     runs-on: ubuntu-latest
@@ -11,3 +21,4 @@ jobs:
           echo "Repo: $GITHUB_REPOSITORY"
           echo "Ref:  $GITHUB_REF"
           echo "Branch: $GITHUB_REF_NAME"
+
