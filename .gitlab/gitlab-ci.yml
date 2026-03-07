@@ -1,60 +1,16 @@
-## Práctica 4 - GitLab CI/CD (estructura final / guía)
+## Práctica 4 - GitLab CI/CD (dummy)
 ##
-## .gitlab-ci.yml — Práctica 4 GitLab CI/CD (Java)
-## Ejercicios 1 y 2: stages + variables globales
+## Punto de partida: pipeline mínimo para validar la sintaxis.
+## En la Práctica 4 irás ampliando este fichero para llegar a CI/CD.
 
 stages:
   - ci
-  - cd
 
-# E2: Variables globales
-variables:
-  IMAGE_NAME: "scalian_training-java-hello-world:0.0.2"
-  APP_URL: "http://localhost:8084/hello"
-
-# E1: Job de información del pipeline
-ci:info:
+ci:dummy:
   stage: ci
+  image: alpine:3.19
   script:
-    - echo "==> Info del pipeline"
-    - echo "Rama:    $CI_COMMIT_BRANCH"
-    - echo "Commit:  $CI_COMMIT_SHORT_SHA"
-    - echo "Imagen:  $IMAGE_NAME"
-    - echo "APP_URL: $APP_URL"
+    - echo "Repo: $CI_PROJECT_PATH"
+    - echo "Branch: $CI_COMMIT_BRANCH"
+    - echo "SHA: $CI_COMMIT_SHA"
 
-ci:lint:
-  stage: ci
-  script:
-    - echo "TODO: make lint"
-
-ci:test:
-  stage: ci
-  script:
-    - echo "TODO: make test"
-
-ci:build-image:
-  stage: ci
-  image: docker:27
-  services:
-    - docker:27-dind
-  script:
-    - echo "TODO: docker build"
-
-cd:deploy:
-  stage: cd
-  image: docker:27
-  services:
-    - docker:27-dind
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"'
-      when: on_success
-    - when: never
-  script:
-    - echo "TODO: deploy"
-  after_script:
-    - echo "TODO: cleanup"
-EOF
-
-git add .gitlab-ci.yml
-git commit -m "E1+E2: stages, variables globales, ci:info"
-git push gitlab develop
