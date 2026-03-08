@@ -6,6 +6,7 @@
 # Fix E4+E5: docker run con --user para evitar permisos root
 # Fix E4+E5: fix maven.repo.local para evitar warning de permisos
 # E6+E7: stage CD con condicion, deploy y cleanup
+# E8: consumir templates CI y CD desde repo IaC
 
 trigger:
   branches:
@@ -30,6 +31,14 @@ variables:
   - name: COMPOSE_SERVICE
     value: app
 
+resources:
+  repositories:
+    - repository: iac
+      type: github
+      name: ekonjmrivas-devops/devops-training-iac-devops
+      ref: refs/heads/develop
+      endpoint: github-connection
+
 stages:
   - stage: CI
     displayName: "Integracion Continua"
@@ -45,40 +54,19 @@ stages:
               echo "Agente:     $(Agent.Name)"
             displayName: "Info del pipeline"
 
-      - job: Lint
+      - job: LintTest
         pool:
           name: local-docker
         dependsOn: Info
         steps:
-          - script: |
-              docker run --rm \
-                -v $(pwd):/app \
-                -w /app \
-                --user $(id -u):$(id -g) \
-                -e MAVEN_OPTS="-Dmaven.repo.local=/app/.m2" \
-                maven:3.8.6-openjdk-11-slim \
-                mvn -q -Dmaven.repo.local=/app/.m2 -DskipTests=true test
-            displayName: "Lint (mvn compile sin tests)"
-
-      - job: Test
-        pool:
-          name: local-docker
-        dependsOn: Lint
-        steps:
-          - script: |
-              docker run --rm \
-                -v $(pwd):/app \
-                -w /app \
-                --user $(id -u):$(id -g) \
-                -e MAVEN_OPTS="-Dmaven.repo.local=/app/.m2" \
-                maven:3.8.6-openjdk-11-slim \
-                mvn -q -Dmaven.repo.local=/app/.m2 test
-            displayName: "Test (mvn test)"
+          - template: azure-pipelines/templates/ci-java-steps.yml@iac
+            parameters:
+              mavenImage: "maven:3.8.6-openjdk-11-slim"
 
       - job: BuildImage
         pool:
           name: local-docker
-        dependsOn: Test
+        dependsOn: LintTest
         steps:
           - script: |
               VERSION=$(cat VERSION)
@@ -117,17 +105,9 @@ stages:
               fi
               echo "DEPLOY_ENV=$(DEPLOY_ENV)"
             displayName: "Resolver DEPLOY_ENV"
-          - script: |
-              echo "==> Deploy en $(DEPLOY_ENV)"
-              docker compose -f $(COMPOSE_FILE) up -d $(COMPOSE_SERVICE)
-            displayName: "docker compose up"
-          - script: |
-              sleep 3
-              docker compose -f $(COMPOSE_FILE) logs $(COMPOSE_SERVICE)
-            displayName: "Logs del servicio"
-          - script: |
-              docker compose -f $(COMPOSE_FILE) down --volumes --remove-orphans || true
-              docker rmi $(IMAGE_REPO):$(IMAGE_TAG) || true
-              echo "Cleanup completado"
-            displayName: "Cleanup (always)"
-            condition: always()
+          - template: azure-pipelines/templates/cd-compose-steps.yml@iac
+            parameters:
+              composeFile: $(COMPOSE_FILE)
+              composeService: $(COMPOSE_SERVICE)
+              imageRepo: $(IMAGE_REPO)
+              imageTag: $(IMAGE_TAG)
