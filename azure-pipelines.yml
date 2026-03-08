@@ -3,6 +3,7 @@
 # Ejercicio 4+5 CI con Maven + build imagen Docker
 # Fix Ejecutar jobs con dependencia dentro de stage CI
 # Fix E4+E5: usar ci.Dockerfile para lint y test sin montar volumen
+# Fix E4+E5: docker run con --user para evitar permisos root
 
 trigger:
   branches:
@@ -48,8 +49,12 @@ stages:
         dependsOn: Info
         steps:
           - script: |
-              docker build -f devops/ci.Dockerfile -t ci-tools-java .
-              docker run --rm ci-tools-java mvn -q -DskipTests=true test
+              docker run --rm \
+                -v $(pwd):/app \
+                -w /app \
+                --user $(id -u):$(id -g) \
+                maven:3.8.6-openjdk-11-slim \
+                mvn -q -DskipTests=true test
             displayName: "Lint (mvn compile sin tests)"
 
       - job: Test
@@ -58,8 +63,12 @@ stages:
         dependsOn: Lint
         steps:
           - script: |
-              docker build -f devops/ci.Dockerfile -t ci-tools-java .
-              docker run --rm ci-tools-java mvn -q test
+              docker run --rm \
+                -v $(pwd):/app \
+                -w /app \
+                --user $(id -u):$(id -g) \
+                maven:3.8.6-openjdk-11-slim \
+                mvn -q test
             displayName: "Test (mvn test)"
 
       - job: BuildImage
