@@ -48,7 +48,7 @@ cd:deploy:
     DOCKER_TLS_VERIFY: 1
     DOCKER_CERT_PATH: "/certs/client"
   rules:
-    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master"'
       when: on_success
     - when: never
   script:
