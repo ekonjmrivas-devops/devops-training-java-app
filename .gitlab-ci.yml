@@ -8,7 +8,6 @@ stages:
 
 ci:dummy:
   stage: ci
-  image: alpine:3.19
   script:
     - echo "Repo: $CI_PROJECT_PATH"
     - echo "Branch: $CI_COMMIT_BRANCH"
