@@ -1,6 +1,5 @@
 # azure-pipelines/010-pipeline-dummy.yml
 # Pipeline dummy para validar Service Connection y permisos del agente
-# 
 
 trigger:
   branches:
@@ -8,14 +7,15 @@ trigger:
       - develop
       - main
 
-pool:
-  vmImage: local-docker
-
-steps:
-  - script: |
-      echo "=== Pipeline dummy Azure DevOps ==="
-      echo "Rama:    $(Build.SourceBranchName)"
-      echo "Commit:  $(Build.SourceVersion)"
-      echo "Agente:  $(Agent.Name)"
-      echo "Pool:    $(Agent.PoolName)"
-    displayName: "Info del agente"
+jobs:
+  - job: Info
+    pool:
+      name: local-docker
+    steps:
+      - script: |
+          echo "=== Pipeline dummy Azure DevOps ==="
+          echo "Rama:    $(Build.SourceBranchName)"
+          echo "Commit:  $(Build.SourceVersion)"
+          echo "Agente:  $(Agent.Name)"
+          echo "Pool:    $(Agent.PoolName)"
+        displayName: "Info del agente"
