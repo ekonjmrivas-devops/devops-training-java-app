@@ -54,9 +54,9 @@ cd:deploy:
   script:
     - VERSION=$(cat VERSION)
     - docker build -t $IMAGE_NAME --build-arg VERSION=$VERSION -f devops/Dockerfile .
-    - docker compose up -d java_app
+    - docker compose up -d app
     - sleep 5
-    - docker compose logs java_app
+    - docker compose logs app
   after_script:
     - docker compose down --volumes || true
     - docker rmi $IMAGE_NAME || true
