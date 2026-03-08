@@ -1,5 +1,5 @@
-# azure-pipelines/010-pipeline-dummy.yml
-# Pipeline dummy para validar Service Connection y permisos del agente
+# Práctica 5 Pipelines CD/CI Azure DevOps
+# Ejercicio 1+2+3 Pipeline con stages, variables y parámetros
 
 trigger:
   branches:
@@ -7,15 +7,34 @@ trigger:
       - develop
       - main
 
-jobs:
-  - job: Info
-    pool:
-      name: local-docker
-    steps:
-      - script: |
-          echo "=== Pipeline dummy Azure DevOps ==="
-          echo "Rama:    $(Build.SourceBranchName)"
-          echo "Commit:  $(Build.SourceVersion)"
-          echo "Agente:  $(Agent.Name)"
-          echo "Pool:    $(Agent.PoolName)"
-        displayName: "Info del agente"
+parameters:
+  - name: RUN_CD
+    displayName: "Ejecutar CD"
+    type: boolean
+    default: false
+  - name: ENABLE_REGISTRY_PUSH
+    displayName: "Push imagen al registry"
+    type: boolean
+    default: false
+
+variables:
+  - group: devops-training-java-saas
+  - name: COMPOSE_FILE
+    value: docker-compose.yml
+  - name: COMPOSE_SERVICE
+    value: app
+
+stages:
+  - stage: CI
+    displayName: "Integracion Continua"
+    jobs:
+      - job: Info
+        pool:
+          name: local-docker
+        steps:
+          - script: |
+              echo "Rama:      $(Build.SourceBranchName)"
+              echo "Commit:    $(Build.SourceVersion)"
+              echo "IMAGE_REPO: $(IMAGE_REPO)"
+              echo "Agente:    $(Agent.Name)"
+            displayName: "Info del pipeline"
