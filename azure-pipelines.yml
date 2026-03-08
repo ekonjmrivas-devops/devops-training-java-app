@@ -2,6 +2,7 @@
 # Ejercicio 1+2+3 Pipeline con stages, variables y parámetros
 # Ejercicio 4+5 CI con Maven + build imagen Docker
 # Fix Ejecutar jobs con dependencia dentro de stage CI
+# Fix E4+E5: usar ci.Dockerfile para lint y test sin montar volumen
 
 trigger:
   branches:
@@ -46,22 +47,20 @@ stages:
           name: local-docker
         dependsOn: Info
         steps:
-          - script: docker run --rm -v $(pwd):/app -w /app maven:3.8.6-openjdk-11-slim mvn -q -DskipTests=true test
-            displayName: "Lint (mvn compile)"
-          - script: sudo rm -rf $(pwd)/target
-            displayName: "Cleanup target"
-            condition: always()
+          - script: |
+              docker build -f devops/ci.Dockerfile -t ci-tools-java .
+              docker run --rm ci-tools-java mvn -q -DskipTests=true test
+            displayName: "Lint (mvn compile sin tests)"
 
       - job: Test
         pool:
           name: local-docker
         dependsOn: Lint
         steps:
-          - script: docker run --rm -v $(pwd):/app -w /app maven:3.8.6-openjdk-11-slim mvn -q test
+          - script: |
+              docker build -f devops/ci.Dockerfile -t ci-tools-java .
+              docker run --rm ci-tools-java mvn -q test
             displayName: "Test (mvn test)"
-          - script: sudo rm -rf $(pwd)/target
-            displayName: "Cleanup target"
-            condition: always()
 
       - job: BuildImage
         pool:
