@@ -5,6 +5,7 @@
 # Fix E4+E5: usar ci.Dockerfile para lint y test sin montar volumen
 # Fix E4+E5: docker run con --user para evitar permisos root
 # Fix E4+E5: fix maven.repo.local para evitar warning de permisos
+# E6+E7: stage CD con condicion, deploy y cleanup
 
 trigger:
   branches:
@@ -91,3 +92,42 @@ stages:
               docker logout
             displayName: "docker push (Docker Hub)"
             condition: and(succeeded(), eq('${{ parameters.ENABLE_REGISTRY_PUSH }}', true))
+
+  - stage: CD
+    displayName: "Despliegue Continuo"
+    dependsOn: CI
+    condition: |
+      and(succeeded(), or(
+        eq(variables['Build.SourceBranchName'], 'develop'),
+        eq(variables['Build.SourceBranchName'], 'main'),
+        eq('${{ parameters.RUN_CD }}', true)
+      ))
+    jobs:
+      - job: Deploy
+        pool:
+          name: local-docker
+        variables:
+          IMAGE_TAG: $[ stageDependencies.CI.BuildImage.outputs['build.IMAGE_TAG'] ]
+        steps:
+          - script: |
+              if [ "$(Build.SourceBranchName)" = "main" ]; then
+                echo "##vso[task.setvariable variable=DEPLOY_ENV]PRO"
+              else
+                echo "##vso[task.setvariable variable=DEPLOY_ENV]DEV"
+              fi
+              echo "DEPLOY_ENV=$(DEPLOY_ENV)"
+            displayName: "Resolver DEPLOY_ENV"
+          - script: |
+              echo "==> Deploy en $(DEPLOY_ENV)"
+              docker compose -f $(COMPOSE_FILE) up -d $(COMPOSE_SERVICE)
+            displayName: "docker compose up"
+          - script: |
+              sleep 3
+              docker compose -f $(COMPOSE_FILE) logs $(COMPOSE_SERVICE)
+            displayName: "Logs del servicio"
+          - script: |
+              docker compose -f $(COMPOSE_FILE) down --volumes --remove-orphans || true
+              docker rmi $(IMAGE_REPO):$(IMAGE_TAG) || true
+              echo "Cleanup completado"
+            displayName: "Cleanup (always)"
+            condition: always()
