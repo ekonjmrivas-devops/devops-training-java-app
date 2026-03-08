@@ -16,13 +16,15 @@ ci:info:
 
 ci:lint:
   stage: ci
+  image: maven:3.8.6-openjdk-11-slim
   script:
-    - echo "TODO make lint"
+    - make lint
 
 ci:test:
   stage: ci
+  image: maven:3.8.6-openjdk-11-slim
   script:
-    - echo "TODO make test"
+    - make test
 
 ci:build-image:
   stage: ci
