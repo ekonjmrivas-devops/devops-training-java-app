@@ -37,7 +37,8 @@ resources:
       type: github
       name: ekonjmrivas-devops/devops-training-iac-devops
       ref: refs/heads/develop
-      endpoint: github-connection
+      #endpoint: github-connection
+      endpoint: ekonjmrivas-devops
 
 stages:
   - stage: CI
