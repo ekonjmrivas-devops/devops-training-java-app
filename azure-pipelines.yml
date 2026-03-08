@@ -9,7 +9,7 @@ trigger:
       - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: local-docker
 
 steps:
   - script: |
