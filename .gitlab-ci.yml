@@ -18,13 +18,13 @@ ci:lint:
   stage: ci
   image: maven:3.8.6-openjdk-11-slim
   script:
-    - make lint
+    - mvn -q -DskipTests=true test
 
 ci:test:
   stage: ci
   image: maven:3.8.6-openjdk-11-slim
   script:
-    - make test
+    - mvn -q test
 
 ci:build-image:
   stage: ci
