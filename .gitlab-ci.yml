@@ -40,12 +40,24 @@ cd:deploy:
   stage: cd
   image: docker:27
   services:
-    - docker:27-dind
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "/certs/client"
   rules:
     - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"'
       when: on_success
     - when: never
   script:
-    - echo "TODO deploy"
+    - VERSION=$(cat VERSION)
+    - docker build -t $IMAGE_NAME --build-arg VERSION=$VERSION -f devops/Dockerfile .
+    - docker compose up -d java_app
+    - sleep 5
+    - docker compose logs java_app
   after_script:
-    - echo "TODO cleanup"
+    - docker compose down --volumes || true
+    - docker rmi $IMAGE_NAME || true
+    - echo "Cleanup completado"
