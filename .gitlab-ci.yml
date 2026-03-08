@@ -32,7 +32,9 @@ ci:build-image:
   services:
     - docker:27-dind
   script:
-    - echo "TODO docker build"
+    - VERSION=$(cat VERSION)
+    - echo "Construyendo imagen $IMAGE_NAME con VERSION=$VERSION"
+    - docker build -t $IMAGE_NAME --build-arg VERSION=$VERSION -f devops/Dockerfile .
 
 cd:deploy:
   stage: cd
