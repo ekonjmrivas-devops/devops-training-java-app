@@ -1,8 +1,47 @@
 stages:
   - ci
+  - cd
 
-ci:dummy:
+variables:
+  IMAGE_NAME: "scalian_training-java-hello-world:0.0.2"
+  APP_URL: "http://localhost:8084/hello"
+
+ci:info:
   stage: ci
   script:
-    - echo "Pipeline OK"
     - echo "Rama $CI_COMMIT_BRANCH"
+    - echo "Commit $CI_COMMIT_SHORT_SHA"
+    - echo "Imagen $IMAGE_NAME"
+    - echo "URL $APP_URL"
+
+ci:lint:
+  stage: ci
+  script:
+    - echo "TODO make lint"
+
+ci:test:
+  stage: ci
+  script:
+    - echo "TODO make test"
+
+ci:build-image:
+  stage: ci
+  image: docker:27
+  services:
+    - docker:27-dind
+  script:
+    - echo "TODO docker build"
+
+cd:deploy:
+  stage: cd
+  image: docker:27
+  services:
+    - docker:27-dind
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"'
+      when: on_success
+    - when: never
+  script:
+    - echo "TODO deploy"
+  after_script:
+    - echo "TODO cleanup"
