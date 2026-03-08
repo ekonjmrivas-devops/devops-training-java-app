@@ -1,7 +1,11 @@
 # azure-pipelines/010-pipeline-dummy.yml
 # Pipeline dummy para validar Service Connection y permisos del agente
 
-trigger: none
+trigger:
+  branches:
+    include:
+      - develop
+      - main
 
 pool:
   vmImage: ubuntu-latest
