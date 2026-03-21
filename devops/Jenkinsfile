@@ -1,5 +1,6 @@
 def runInDocker(String image, Closure body) {
-  docker.image(image).inside {
+  #docker.image(image).inside {
+  docker.image(image).inside('--network devops-training-2025-iac-devops_devops_training_net') {
     body()
   }
 }
