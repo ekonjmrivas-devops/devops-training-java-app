@@ -19,6 +19,7 @@ pipeline {
         echo "Job: ${env.JOB_NAME}"
         echo "Build: ${env.BUILD_NUMBER}"
         echo "Branch: ${env.BRANCH_NAME}"
+	echo "Comprobando ejecución después de push"
       }
     }
     stage('CI - Build tools image') {
