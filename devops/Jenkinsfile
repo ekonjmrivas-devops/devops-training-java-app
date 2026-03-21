@@ -50,12 +50,8 @@ pipeline {
     }
     stage('CI - SonarQube Analysis') {
       steps {
-        script {
-          runInDocker(env.CI_IMAGE_NAME) {
-            withSonarQubeEnv('SonarQube') {
-              sh 'mvn sonar:sonar -Dsonar.projectKey=DevOps -Dsonar.projectName=\'Github\' -Dsonar.host.url=http://sonarqube:9000'
-           }
-          }
+        withSonarQubeEnv('SonarQube') {
+          sh 'mvn sonar:sonar -Dsonar.projectKey=DevOps -Dsonar.projectName=\'Github\''
         }
       }
     }
