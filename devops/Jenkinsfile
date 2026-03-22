@@ -57,7 +57,7 @@ pipeline {
              -Dsonar.projectName="Github" \
              -Dsonar.sources=. \
              -Dsonar.java.binaries=target \
-             -Dsonar.host.url=http://192.168.50.201:9000
+             -Dsonar.host.url=http://sonarqube:9000
          '''       
        }
      }
