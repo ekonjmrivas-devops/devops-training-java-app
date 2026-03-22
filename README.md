@@ -83,7 +83,7 @@ docker run \
     mvn verify sonar:sonar \
     -Dsonar.projectKey=devops-training-java-app \
     -Dsonar.host.url=http://172.16.234.10:9000 \
-    -Dsonar.login=sqp_01291ee195139732bf0509b512c5f8dd4ccc8bf9
+    
 
 docker-compose down
 ```
