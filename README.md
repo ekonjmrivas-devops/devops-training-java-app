@@ -1,4 +1,5 @@
 # DevOps Training - App Java
+#
 
 Repositorio de la aplicación Java usada en el curso para practicar estrategias DevOps de CI/CD en proyectos compilados.
 
