@@ -7,6 +7,8 @@
 # Fix E4+E5: fix maven.repo.local para evitar warning de permisos
 # E6+E7: stage CD con condicion, deploy y cleanup
 # E8: consumir templates CI y CD desde repo IaC
+# Módulo 2
+# Añadir SonarQube
 
 trigger:
   branches:
@@ -63,11 +65,21 @@ stages:
           - template: azure-pipelines/templates/ci-java-steps.yml@iac
             parameters:
               mavenImage: "maven:3.8.6-openjdk-11-slim"
-
-      - job: BuildImage
+      - job: SonarAnalysis
         pool:
           name: local-docker
         dependsOn: LintTest
+        steps:
+          - template: azure-pipelines/templates/ci-sonar-steps.yml@iac
+            parameters:
+              mavenImage: "maven:3.8.6-openjdk-11-slim"
+              sonarHostUrl: "http://192.168.50.201:9000"
+              sonarProjectKey: "DevOps"
+              sonarToken: $(SONAR_TOKEN)
+      - job: BuildImage
+        pool:
+          name: local-docker
+        dependsOn: SonarAnalysis
         steps:
           - script: |
               VERSION=$(cat VERSION)
