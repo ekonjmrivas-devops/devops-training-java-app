@@ -1,5 +1,6 @@
 package com.scala_training.helloworld.e2e;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +23,11 @@ public class HelloWorldE2ETest {
 
     @BeforeEach
     public void setUp() {
+        WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");       // Sin interfaz gráfica
-        options.addArguments("--no-sandbox");     // Necesario en Linux/CI
-        options.addArguments("--disable-dev-shm-usage"); // Necesario en CI
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
         driver = new ChromeDriver(options);
     }
 
@@ -43,7 +45,5 @@ public class HelloWorldE2ETest {
         }
     }
 }
-
-
 
 
