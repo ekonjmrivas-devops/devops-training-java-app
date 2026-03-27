@@ -9,6 +9,7 @@
 # E8: consumir templates CI y CD desde repo IaC
 # Módulo 2
 # Añadir SonarQube
+# Cambiar imagenMave para soportar Java17
 
 trigger:
   branches:
@@ -72,7 +73,8 @@ stages:
         steps:
           - template: azure-pipelines/templates/ci-sonar-steps.yml@iac
             parameters:
-              mavenImage: "maven:3.8.6-openjdk-11-slim"
+              # mavenImage: "maven:3.8.6-openjdk-11-slim"
+              mavenImage: "maven:3.9-eclipse-temurin-17"
               sonarHostUrl: "http://192.168.50.201:9000"
               sonarProjectKey: "DevOps"
               sonarToken: $(SONAR_TOKEN)
