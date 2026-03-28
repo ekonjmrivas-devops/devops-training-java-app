@@ -37,9 +37,9 @@ public class HelloWorldE2ETest {
 
     @Test
     public void shouldDisplayHelloWorld() throws Exception {
-        // En Linux, host.docker.internal no existe — usamos la IP del gateway Docker
         String dockerHost = System.getProperty("docker.host", "172.17.0.1");
-        String baseUrl = "http://" + dockerHost + ":" + port + "/hello";
+        String appPort = System.getProperty("server.port", "8080");
+        String baseUrl = "http://" + dockerHost + ":" + appPort + "/hello";
         driver.get(baseUrl);
         String bodyText = driver.findElement(By.tagName("body")).getText();
         assertEquals("Hello World!", bodyText);
