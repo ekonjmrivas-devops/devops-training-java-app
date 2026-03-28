@@ -14,7 +14,7 @@ import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
                 properties = "server.port=8085")
 public class HelloWorldE2ETest {
 
@@ -35,8 +35,9 @@ public class HelloWorldE2ETest {
 
     @Test
     public void shouldDisplayHelloWorld() throws Exception {
-        String dockerHost = System.getProperty("docker.host", "172.17.0.1");
-        String baseUrl = "http://" + dockerHost + ":8085/hello";
+        // Usar la IP del contenedor Maven en la red selenium-net
+        String appHost = System.getProperty("app.host", "172.18.0.3");
+        String baseUrl = "http://" + appHost + ":8085/hello";
         driver.get(baseUrl);
         String bodyText = driver.findElement(By.tagName("body")).getText();
         assertEquals("Hello World!", bodyText);
