@@ -37,8 +37,9 @@ public class HelloWorldE2ETest {
 
     @Test
     public void shouldDisplayHelloWorld() throws Exception {
-        // El contenedor Maven no puede usar localhost — usa la IP del host Docker
-        String baseUrl = "http://host.docker.internal:" + port + "/hello";
+        // En Linux, host.docker.internal no existe — usamos la IP del gateway Docker
+        String dockerHost = System.getProperty("docker.host", "172.17.0.1");
+        String baseUrl = "http://" + dockerHost + ":" + port + "/hello";
         driver.get(baseUrl);
         String bodyText = driver.findElement(By.tagName("body")).getText();
         assertEquals("Hello World!", bodyText);
