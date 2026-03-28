@@ -1,4 +1,3 @@
-RUN mvn install
 # Build stage
 FROM maven:3.8.6-eclipse-temurin-17 as build
 ARG VERSION=0.0.1-SNAPSHOT
