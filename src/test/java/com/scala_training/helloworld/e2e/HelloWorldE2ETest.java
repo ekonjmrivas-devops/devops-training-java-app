@@ -14,11 +14,9 @@ import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, 
+                properties = "server.port=8085")
 public class HelloWorldE2ETest {
-
-    @LocalServerPort
-    private int port;
 
     private WebDriver driver;
 
@@ -38,8 +36,7 @@ public class HelloWorldE2ETest {
     @Test
     public void shouldDisplayHelloWorld() throws Exception {
         String dockerHost = System.getProperty("docker.host", "172.17.0.1");
-        String appPort = System.getProperty("server.port", "8080");
-        String baseUrl = "http://" + dockerHost + ":" + appPort + "/hello";
+        String baseUrl = "http://" + dockerHost + ":8085/hello";
         driver.get(baseUrl);
         String bodyText = driver.findElement(By.tagName("body")).getText();
         assertEquals("Hello World!", bodyText);
@@ -52,3 +49,4 @@ public class HelloWorldE2ETest {
         }
     }
 }
+
