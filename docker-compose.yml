@@ -9,6 +9,7 @@ networks:
 volumes:
   prometheus-data:
   grafana-data:
+  elasticsearch-data:
 services:
   app:
     build:
@@ -17,6 +18,8 @@ services:
     container_name: java_app
     ports:
       - 8084:8080
+    volumes:
+      - ./logs:/app/logs
     networks:
       java-project-net:
         aliases:
@@ -53,4 +56,54 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - prometheus
+    restart: unless-stopped
+
+  elasticsearch:
+    image: elasticsearch:8.8.0
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      java-project-net:
+        aliases:
+          - elasticsearch
+    restart: unless-stopped
+
+  logstash:
+    image: logstash:8.8.0
+    container_name: logstash
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./devops/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./logs:/logs
+    environment:
+      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+    depends_on:
+      - elasticsearch
+    networks:
+      java-project-net:
+        aliases:
+          - logstash
+    restart: unless-stopped
+
+  kibana:
+    image: kibana:8.8.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      java-project-net:
+        aliases:
+          - kibana
     restart: unless-stopped
