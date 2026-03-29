@@ -33,11 +33,15 @@ public class HelloWorldE2ETest {
         );
     }
 
+
     @Test
     public void shouldDisplayHelloWorld() throws Exception {
-        // Usar la IP del contenedor Maven en la red selenium-net
         String appHost = System.getProperty("app.host", "172.18.0.3");
         String baseUrl = "http://" + appHost + ":8085/hello";
+
+        // Esperar a que Spring Boot esté completamente listo
+        Thread.sleep(10000);
+
         driver.get(baseUrl);
         String bodyText = driver.findElement(By.tagName("body")).getText();
         assertEquals("Hello World!", bodyText);
