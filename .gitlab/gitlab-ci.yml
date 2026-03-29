@@ -1,0 +1,16 @@
+## Práctica 4 - GitLab CI/CD (dummy)
+##
+## Punto de partida: pipeline mínimo para validar la sintaxis.
+## En la Práctica 4 irás ampliando este fichero para llegar a CI/CD.
+
+stages:
+  - ci
+
+ci:dummy:
+  stage: ci
+  image: alpine:3.19
+  script:
+    - echo "Repo: $CI_PROJECT_PATH"
+    - echo "Branch: $CI_COMMIT_BRANCH"
+    - echo "SHA: $CI_COMMIT_SHA"
+

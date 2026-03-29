@@ -1,0 +1,63 @@
+stages:
+  - ci
+  - cd
+
+variables:
+  IMAGE_NAME: "scalian_training-java-hello-world:0.0.2"
+  APP_URL: "http://localhost:8084/hello"
+
+ci:info:
+  stage: ci
+  script:
+    - echo "Rama $CI_COMMIT_BRANCH"
+    - echo "Commit $CI_COMMIT_SHORT_SHA"
+    - echo "Imagen $IMAGE_NAME"
+    - echo "URL $APP_URL"
+
+ci:lint:
+  stage: ci
+  image: maven:3.8.6-openjdk-11-slim
+  script:
+    - mvn -q -DskipTests=true test
+
+ci:test:
+  stage: ci
+  image: maven:3.8.6-openjdk-11-slim
+  script:
+    - mvn -q test
+
+ci:build-image:
+  stage: ci
+  image: docker:27
+  services:
+    - docker:27-dind
+  script:
+    - VERSION=$(cat VERSION)
+    - echo "Construyendo imagen $IMAGE_NAME con VERSION=$VERSION"
+    - docker build -t $IMAGE_NAME --build-arg VERSION=$VERSION -f devops/Dockerfile .
+
+cd:deploy:
+  stage: cd
+  image: docker:27
+  services:
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "/certs/client"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - when: never
+  script:
+    - VERSION=$(cat VERSION)
+    - docker build -t $IMAGE_NAME --build-arg VERSION=$VERSION -f devops/Dockerfile .
+    - docker compose up -d app
+    - sleep 5
+    - docker compose logs app
+  after_script:
+    - docker compose down --volumes || true
+    - docker rmi $IMAGE_NAME || true
+    - echo "Cleanup completado"

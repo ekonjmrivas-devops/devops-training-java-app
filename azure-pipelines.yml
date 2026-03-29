@@ -1,0 +1,128 @@
+# Práctica 5 Pipelines CD/CI Azure DevOps
+# Ejercicio 1+2+3 Pipeline con stages, variables y parámetros
+# Ejercicio 4+5 CI con Maven + build imagen Docker
+# Fix Ejecutar jobs con dependencia dentro de stage CI
+# Fix E4+E5: usar ci.Dockerfile para lint y test sin montar volumen
+# Fix E4+E5: docker run con --user para evitar permisos root
+# Fix E4+E5: fix maven.repo.local para evitar warning de permisos
+# E6+E7: stage CD con condicion, deploy y cleanup
+# E8: consumir templates CI y CD desde repo IaC
+# Módulo 2
+# Añadir SonarQube
+# Cambiar imagenMave para soportar Java17
+
+trigger:
+  branches:
+    include:
+      - develop
+      - main
+
+parameters:
+  - name: RUN_CD
+    displayName: "Ejecutar CD"
+    type: boolean
+    default: false
+  - name: ENABLE_REGISTRY_PUSH
+    displayName: "Push imagen al registry"
+    type: boolean
+    default: false
+
+variables:
+  - group: devops-training-java-saas
+  - name: COMPOSE_FILE
+    value: docker-compose.yml
+  - name: COMPOSE_SERVICE
+    value: app
+
+resources:
+  repositories:
+    - repository: iac
+      type: github
+      name: ekonjmrivas-devops/devops-training-iac-devops
+      ref: refs/heads/develop
+      #endpoint: github-connection
+      endpoint: ekonjmrivas-devops
+
+stages:
+  - stage: CI
+    displayName: "Integracion Continua"
+    jobs:
+      - job: Info
+        pool:
+          name: local-docker
+        steps:
+          - script: |
+              echo "Rama:       $(Build.SourceBranchName)"
+              echo "Commit:     $(Build.SourceVersion)"
+              echo "IMAGE_REPO: $(IMAGE_REPO)"
+              echo "Agente:     $(Agent.Name)"
+            displayName: "Info del pipeline"
+
+      - job: LintTest
+        pool:
+          name: local-docker
+        dependsOn: Info
+        steps:
+          - template: azure-pipelines/templates/ci-java-steps.yml@iac
+            parameters:
+              mavenImage: "maven:3.9-eclipse-temurin-17"
+      - job: SonarAnalysis
+        pool:
+          name: local-docker
+        dependsOn: LintTest
+        steps:
+          - template: azure-pipelines/templates/ci-sonar-steps.yml@iac
+            parameters:
+              # mavenImage: "maven:3.9-eclipse-temurin-17"
+              mavenImage: "maven:3.9-eclipse-temurin-17"
+              sonarHostUrl: "http://192.168.50.201:9000"
+              sonarProjectKey: "DevOps"
+              sonarToken: $(SONAR_TOKEN)
+      - job: BuildImage
+        pool:
+          name: local-docker
+        dependsOn: SonarAnalysis
+        steps:
+          - script: |
+              VERSION=$(cat VERSION)
+              echo "##vso[task.setvariable variable=IMAGE_TAG;isOutput=true]$VERSION"
+              docker build -t $(IMAGE_REPO):$VERSION --build-arg VERSION=$VERSION -f devops/Dockerfile .
+            name: build
+            displayName: "docker build"
+          - script: |
+              echo "$(DOCKERHUB_PASSWORD)" | docker login -u "$(DOCKERHUB_USERNAME)" --password-stdin
+              docker push $(IMAGE_REPO):$(build.IMAGE_TAG)
+              docker logout
+            displayName: "docker push (Docker Hub)"
+            condition: and(succeeded(), eq('${{ parameters.ENABLE_REGISTRY_PUSH }}', true))
+
+  - stage: CD
+    displayName: "Despliegue Continuo"
+    dependsOn: CI
+    condition: |
+      and(succeeded(), or(
+        eq(variables['Build.SourceBranchName'], 'develop'),
+        eq(variables['Build.SourceBranchName'], 'main'),
+        eq('${{ parameters.RUN_CD }}', true)
+      ))
+    jobs:
+      - job: Deploy
+        pool:
+          name: local-docker
+        variables:
+          IMAGE_TAG: $[ stageDependencies.CI.BuildImage.outputs['build.IMAGE_TAG'] ]
+        steps:
+          - script: |
+              if [ "$(Build.SourceBranchName)" = "main" ]; then
+                echo "##vso[task.setvariable variable=DEPLOY_ENV]PRO"
+              else
+                echo "##vso[task.setvariable variable=DEPLOY_ENV]DEV"
+              fi
+              echo "DEPLOY_ENV=$(DEPLOY_ENV)"
+            displayName: "Resolver DEPLOY_ENV"
+          - template: azure-pipelines/templates/cd-compose-steps.yml@iac
+            parameters:
+              composeFile: $(COMPOSE_FILE)
+              composeService: $(COMPOSE_SERVICE)
+              imageRepo: $(IMAGE_REPO)
+              imageTag: $(IMAGE_TAG)
