@@ -1,5 +1,4 @@
 version: "3.7"
-
 networks:
   java-project-net:
     driver: bridge
@@ -7,50 +6,50 @@ networks:
       driver: default
       config:
         - subnet: 172.16.234.0/24
-
-# volumes:
-  # postgresql-vol:
-  # sonarqube-vol:
-
+volumes:
+  prometheus-data:
+  grafana-data:
 services:
-  ## TO BUILD AND RUN APP LOCALLY
   app:
-    #image: scalian_training-java-hello-world:0.0.2
-    build: 
+    build:
       context: .
       dockerfile: devops/Dockerfile
     container_name: java_app
     ports:
       - 8084:8080
+    networks:
+      java-project-net:
+        aliases:
+          - app
 
-  # sonarqube:
-  #   image: sonarqube:9.9.0-community
-  #   depends_on:
-  #     - sonardb
-  #   environment:
-  #     SONAR_JDBC_URL: jdbc:postgresql://sonardb:5432/sonar
-  #     SONAR_JDBC_USERNAME: sonar
-  #     SONAR_JDBC_PASSWORD: sonar
-  #   volumes:
-  #     - sonarqube-vol:/opt/sonarqube
-  #   ports:
-  #     - "9009:9000"
-  #   hostname: sonarqube
-  #   networks:
-  #     java-project-net:
-  #       ipv4_address: 172.16.234.10
-  #       aliases: 
-  #         - sonarqube
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./devops/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      java-project-net:
+        aliases:
+          - prometheus
+    restart: unless-stopped
 
-  # sonardb:
-  #   image: postgres:12
-  #   environment:
-  #     POSTGRES_USER: sonar
-  #     POSTGRES_PASSWORD: sonar
-  #   volumes:
-  #     - postgresql-vol:/var/lib/postgresql
-  #   hostname: sonardb
-  #   networks:
-  #     java-project-net:
-  #       aliases: 
-  #         - sonardb
+  grafana:
+    image: grafana/grafana:10.0.3
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      java-project-net:
+        aliases:
+          - grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    restart: unless-stopped
