@@ -29,6 +29,7 @@ services:
       - "9090:9090"
     volumes:
       - ./devops/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./devops/alerts.yml:/etc/prometheus/alerts.yml
       - prometheus-data:/prometheus
     networks:
       java-project-net:
